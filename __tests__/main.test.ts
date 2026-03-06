@@ -16,7 +16,7 @@ jest.unstable_mockModule('@actions/core', () => core)
 const { run } = await import('../src/main.js')
 
 describe('main.ts', () => {
-  it('Sets the time output', async () => {
+  it('Gets this repo package as result', async () => {
     await run()
 
     expect(core.setOutput).toHaveBeenNthCalledWith(
