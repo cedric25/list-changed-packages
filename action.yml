@@ -3,8 +3,8 @@ description: Compares your git branch to its base, list changed files and output
 author: Cedric Nicoloso (cedric.nicoloso@gmail.com)
 
 branding:
-  icon: heart
-  color: red
+  icon: package
+  color: blue
 
 outputs:
   changed_packages:

@@ -22,12 +22,12 @@ describe('main.ts', () => {
     expect(core.setOutput).toHaveBeenNthCalledWith(
       1,
       'changed_packages',
-      '@me-corp/ui-kit'
+      'typescript-action'
     )
     expect(core.setOutput).toHaveBeenNthCalledWith(
       2,
       'changed_packages_one_line',
-      '@me-corp/ui-kit'
+      'typescript-action'
     )
   })
 })
