@@ -3,7 +3,7 @@ import os__default from 'os';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { promises } from 'fs';
-import 'path';
+import * as path from 'path';
 import http from 'http';
 import https from 'https';
 import 'net';
@@ -30,7 +30,7 @@ import require$$5$2 from 'node:async_hooks';
 import require$$1$4 from 'node:console';
 import require$$1$5 from 'node:dns';
 import require$$5$3 from 'string_decoder';
-import 'child_process';
+import { execSync } from 'child_process';
 import 'timers';
 
 // We use any as a valid input type
@@ -27952,19 +27952,6 @@ var ExitCode;
     ExitCode[ExitCode["Failure"] = 1] = "Failure";
 })(ExitCode || (ExitCode = {}));
 /**
- * Gets the value of an input.
- * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
- * Returns an empty string if the value is not defined.
- *
- * @param     name     name of the input to get
- * @param     options  optional. See InputOptions.
- * @returns   string
- */
-function getInput(name, options) {
-    const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
-    return val.trim();
-}
-/**
  * Sets the value of an output.
  *
  * @param     name     name of the output to set
@@ -28008,17 +27995,62 @@ function error(message, properties = {}) {
 }
 
 /**
- * Waits for a number of milliseconds.
- *
- * @param milliseconds The number of milliseconds to wait.
- * @returns Resolves with 'done!' after the wait is over.
+ * (Script used in CI)
+ * List all packages that have at least one changed file compared to origin/main base
  */
-async function wait(milliseconds) {
-    return new Promise((resolve) => {
-        if (isNaN(milliseconds))
-            throw new Error('milliseconds is not a number');
-        setTimeout(() => resolve('done!'), milliseconds);
-    });
+/**
+ * List all changed files compared to origin/main *as it was before you branched off*
+ * Try to be smart and exclude "docs/" and ".md" files
+ */
+function getChangedFiles() {
+    execSync('git fetch origin main', { stdio: 'ignore' });
+    const output = execSync('git diff --name-only $(git merge-base HEAD origin/main)').toString();
+    const files = output
+        .split('\n')
+        .map((f) => f.trim())
+        .filter(Boolean)
+        .filter((f) => !f.startsWith('docs/') && !f.endsWith('.md'));
+    return files;
+}
+function isFileInPackage(filePath, packageDir) {
+    const relative = path.relative(packageDir, filePath);
+    return !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+function findPackages(repoRoot) {
+    const packages = [];
+    const stack = [repoRoot];
+    while (stack.length) {
+        const dir = stack.pop();
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+                if (entry.name !== 'node_modules' &&
+                    entry.name !== 'dist' &&
+                    entry.name !== '.git') {
+                    stack.push(fullPath);
+                }
+            }
+            else if (entry.name === 'package.json') {
+                const packageJson = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+                packages.push({
+                    dir: dir,
+                    packageJson
+                });
+            }
+        }
+    }
+    return packages;
+}
+async function getChangedPackages() {
+    const repoRootPath = process.argv[2] || process.cwd();
+    const changedFilesRelative = getChangedFiles();
+    const changedFilesAbsolute = changedFilesRelative.map((f) => path.join(repoRootPath, f));
+    const packages = findPackages(repoRootPath);
+    const changedPackages = packages.filter((pkg) => changedFilesAbsolute.some((file) => isFileInPackage(file, pkg.dir)));
+    return changedPackages
+        .map((pkg) => pkg.packageJson.name)
+        .filter((pkg) => pkg !== 'monorepo-root');
 }
 
 /**
@@ -28028,18 +28060,12 @@ async function wait(milliseconds) {
  */
 async function run() {
     try {
-        const ms = getInput('milliseconds');
-        // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        debug(`Waiting ${ms} milliseconds ...`);
-        // Log the current timestamp, wait, then log the new timestamp
-        debug(new Date().toTimeString());
-        await wait(parseInt(ms, 10));
-        debug(new Date().toTimeString());
-        // Set outputs for other workflow steps to use
-        setOutput('time', new Date().toTimeString());
+        debug('Starting...');
+        const changedPackages = await getChangedPackages();
+        setOutput('changed_packages', changedPackages.join('\n'));
+        setOutput('changed_packages_one_line', changedPackages.join(' '));
     }
     catch (error) {
-        // Fail the workflow run if an error occurs
         if (error instanceof Error)
             setFailed(error.message);
     }
