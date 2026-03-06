@@ -1,23 +1,16 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: Get changed packages
+description: Compares your git branch to its base, list changed files and output related packages
+author: Cedric Nicoloso (cedric.nicoloso@gmail.com)
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: heart
   color: red
 
-# Define your inputs here.
-inputs:
-  milliseconds:
-    description: Your input description here
-    required: true
-    default: '1000'
-
-# Define your outputs here.
 outputs:
-  time:
-    description: Your output description here
+  changed_packages:
+    description: List of changed packages, one package per line
+  changed_packages_one_line:
+    description: List of changed packages, separated by one space
 
 runs:
   using: node24
