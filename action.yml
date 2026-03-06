@@ -1,5 +1,7 @@
 name: Get changed packages
-description: Compares your git branch to its base, list changed files and output related packages
+description:
+  Compares your git branch to its base, list changed files and output related
+  packages
 author: Cedric Nicoloso (cedric.nicoloso@gmail.com)
 
 branding:
