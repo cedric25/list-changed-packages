@@ -28064,6 +28064,10 @@ async function run() {
         const changedPackages = await getChangedPackages();
         setOutput('changed_packages', changedPackages.join('\n'));
         setOutput('changed_packages_one_line', changedPackages.join(' '));
+        setOutput('pnpm_filters_changed_packages', changedPackages.map((packageName) => `--filter ${packageName}`).join(' '));
+        setOutput('pnpm_filters_changed_and_down_packages', changedPackages
+            .map((packageName) => `--filter ${packageName}...`)
+            .join(' '));
     }
     catch (error) {
         if (error instanceof Error)
