@@ -13,6 +13,10 @@ outputs:
     description: List of changed packages, one package per line
   changed_packages_one_line:
     description: List of changed packages, separated by one space
+  pnpm_filters_changed_packages:
+    description: Ready-to-use pnpm filter you can give to pnpm install for example ("--filter package-1 --filter package-2")
+  pnpm_filters_changed_and_down_packages:
+    description: Ready-to-use pnpm filter you can give to pnpm install for example ("--filter package-1... --filter package-2...")
 
 runs:
   using: node24

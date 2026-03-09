@@ -40,6 +40,16 @@ describe('main.ts', () => {
       'changed_packages_one_line',
       'package-1 package-2'
     )
+    expect(core.setOutput).toHaveBeenNthCalledWith(
+      3,
+      'pnpm_filters_changed_packages',
+      '--filter package-1 --filter package-2'
+    )
+    expect(core.setOutput).toHaveBeenNthCalledWith(
+      4,
+      'pnpm_filters_changed_and_down_packages',
+      '--filter package-1... --filter package-2...'
+    )
   })
 
   it('sets failed if an error occurs', async () => {

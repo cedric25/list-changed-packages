@@ -14,6 +14,16 @@ export async function run(): Promise<void> {
 
     core.setOutput('changed_packages', changedPackages.join('\n'))
     core.setOutput('changed_packages_one_line', changedPackages.join(' '))
+    core.setOutput(
+      'pnpm_filters_changed_packages',
+      changedPackages.map((packageName) => `--filter ${packageName}`).join(' ')
+    )
+    core.setOutput(
+      'pnpm_filters_changed_and_down_packages',
+      changedPackages
+        .map((packageName) => `--filter ${packageName}...`)
+        .join(' ')
+    )
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
