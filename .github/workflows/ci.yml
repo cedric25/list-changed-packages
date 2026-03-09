@@ -60,5 +60,15 @@ jobs:
       - name: Print Output
         id: output
         run: |
+          echo ""
+          echo "changed_packages:"
           echo "${{ steps.test-action.outputs.changed_packages }}"
+          echo ""
+          echo "changed_packages_one_line:"
           echo "${{ steps.test-action.outputs.changed_packages_one_line }}"
+          echo ""
+          echo "pnpm_filters_changed_packages:"
+          echo "${{ steps.test-action.outputs.pnpm_filters_changed_packages }}"
+          echo ""
+          echo "pnpm_filters_changed_and_down_packages:"
+          echo "${{ steps.test-action.outputs.pnpm_filters_changed_and_down_packages }}"
