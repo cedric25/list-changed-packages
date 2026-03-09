@@ -11,7 +11,7 @@ import * as fs from 'fs'
  * List all changed files compared to origin/main *as it was before you branched off*
  * Try to be smart and exclude "docs/" and ".md" files
  */
-function getChangedFiles() {
+export function getChangedFiles() {
   execSync('git fetch origin main', { stdio: 'ignore' })
   const output = execSync(
     'git diff --name-only $(git merge-base HEAD origin/main)'
@@ -24,12 +24,12 @@ function getChangedFiles() {
   return files
 }
 
-function isFileInPackage(filePath: string, packageDir: string) {
+export function isFileInPackage(filePath: string, packageDir: string) {
   const relative = path.relative(packageDir, filePath)
   return !relative.startsWith('..') && !path.isAbsolute(relative)
 }
 
-function findPackages(repoRoot: string) {
+export function findPackages(repoRoot: string) {
   const packages = []
   const stack = [repoRoot]
 
