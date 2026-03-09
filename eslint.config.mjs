@@ -78,5 +78,11 @@ export default [
       'no-unused-vars': 'off',
       'prettier/prettier': 'error'
     }
+  },
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
   }
 ]
