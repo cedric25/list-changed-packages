@@ -20,12 +20,12 @@ export function getChangedFiles() {
     .split('\n')
     .map((f) => f.trim())
     .filter(Boolean)
-    .filter((f) => !f.startsWith('docs/') && !f.endsWith('.md'))
+    .filter((f) => !f.includes('docs/') && !f.endsWith('.md'))
   return files
 }
 
-export function isFileInPackage(filePath: string, packageDir: string) {
-  const relative = path.relative(packageDir, filePath)
+export function isFileInPackage(fileAbsolutePath: string, packageDir: string) {
+  const relative = path.relative(packageDir, fileAbsolutePath)
   return !relative.startsWith('..') && !path.isAbsolute(relative)
 }
 
@@ -61,14 +61,16 @@ export function findPackages(repoRoot: string) {
 }
 
 export async function getChangedPackages() {
-  const repoRootPath = process.argv[2] || process.cwd()
+  const repoRootPath = process.cwd()
   const changedFilesRelative = getChangedFiles()
   const changedFilesAbsolute = changedFilesRelative.map((f) =>
     path.join(repoRootPath, f)
   )
   const packages = findPackages(repoRootPath)
   const changedPackages = packages.filter((pkg) =>
-    changedFilesAbsolute.some((file) => isFileInPackage(file, pkg.dir))
+    changedFilesAbsolute.some((fileAbsolutePath) =>
+      isFileInPackage(fileAbsolutePath, pkg.dir)
+    )
   )
   return changedPackages
     .map((pkg) => pkg.packageJson.name)

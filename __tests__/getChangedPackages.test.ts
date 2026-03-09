@@ -28,7 +28,9 @@ describe('getChangedFiles', () => {
       'docs/README.md',
       'README.md',
       'src/utils.test.ts',
-      'docs/api.txt'
+      'docs/api.txt',
+      'src/docs/api.txt',
+      'packages/pkg-a/docs/index.html'
     ].join('\n')
 
     mockedExecSync.mockReturnValue(Buffer.from(mockOutput))
