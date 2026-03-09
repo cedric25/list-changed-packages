@@ -1,7 +1,7 @@
 {
   "name": "list-changed-packages",
   "description": "Compares your git branch to its base, list changed files and output related packages",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "",
   "type": "module",
   "private": true,
