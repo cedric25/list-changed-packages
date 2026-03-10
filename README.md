@@ -52,6 +52,7 @@ jobs:
 
 Imagine having:
 
+```
 root/
 ├── apps/
 │   ├── app-a/
@@ -64,6 +65,7 @@ root/
 │   └── package-b/
 │       ├── src/**
 │       ├── package.json (name = "@my-corp/package-b")
+```
 
 and your current pull request contains changes in:
  - `apps/app-a/src/someFile.ts`,
