@@ -8,7 +8,8 @@
 import { jest } from '@jest/globals'
 import * as core from '../__fixtures__/core.js'
 
-const mockGetChangedPackages = jest.fn<() => Promise<string[]>>()
+const mockGetChangedPackages =
+  jest.fn<() => { changedPackages: string[]; hasLockChanged: boolean }>()
 
 // Mocks should be declared before the module being tested is imported.
 jest.unstable_mockModule('@actions/core', () => core)
@@ -26,7 +27,10 @@ describe('main.ts', () => {
   })
 
   it('Gets this repo package as result', async () => {
-    mockGetChangedPackages.mockResolvedValue(['package-1', 'package-2'])
+    mockGetChangedPackages.mockReturnValue({
+      changedPackages: ['package-1', 'package-2'],
+      hasLockChanged: false
+    })
 
     await run()
 
@@ -50,10 +54,32 @@ describe('main.ts', () => {
       'pnpm_filters_changed_and_down_packages',
       '--filter package-1... --filter package-2...'
     )
+    expect(core.setOutput).toHaveBeenNthCalledWith(
+      5,
+      'has_lock_file_changed',
+      false
+    )
+  })
+
+  it('sets has_lock_file_changed to true when package-lock.json changed', async () => {
+    mockGetChangedPackages.mockReturnValue({
+      changedPackages: ['package-1'],
+      hasLockChanged: true
+    })
+
+    await run()
+
+    expect(core.setOutput).toHaveBeenNthCalledWith(
+      5,
+      'has_lock_file_changed',
+      true
+    )
   })
 
   it('sets failed if an error occurs', async () => {
-    mockGetChangedPackages.mockRejectedValue(new Error('something went wrong'))
+    mockGetChangedPackages.mockImplementation(() => {
+      throw new Error('something went wrong')
+    })
 
     await run()
 
@@ -61,7 +87,9 @@ describe('main.ts', () => {
   })
 
   it('handles non-Error objects in catch block', async () => {
-    mockGetChangedPackages.mockRejectedValue('not an error object')
+    mockGetChangedPackages.mockImplementation(() => {
+      throw 'not an error object'
+    })
 
     await run()
 

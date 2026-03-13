@@ -21,6 +21,7 @@ jobs:
       changed_packages_one_line: ${{ steps.changed-packages.outputs.changed_packages_one_line }}
       pnpm_filters_changed_packages: ${{ steps.changed-packages.outputs.pnpm_filters_changed_packages }}
       pnpm_filters_changed_and_down_packages: ${{ steps.changed-packages.outputs.pnpm_filters_changed_and_down_packages }}
+      has_lock_file_changed: ${{ steps.changed-packages.outputs.has_lock_file_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -46,6 +47,9 @@ jobs:
           echo ""
           echo "pnpm_filters_changed_and_down_packages:"
           echo "${{ steps.changed-packages.outputs.pnpm_filters_changed_and_down_packages }}"
+          echo ""
+          echo "has_lock_file_changed:"
+          echo "${{ steps.changed-packages.outputs.has_lock_file_changed }}"
 ```
 
 ## Outputs
@@ -71,7 +75,7 @@ and your current pull request contains changes in:
  - `apps/app-a/src/someFile.ts`,
  - `packages/package-a/src/someFile.ts`,
 
-this GitHub action will return 4 items as its output:
+this GitHub action will return 5 items as its output:
 
 **changed_packages**:
 ```
@@ -92,6 +96,11 @@ this GitHub action will return 4 items as its output:
 **pnpm_filters_changed_and_down_packages**:
 ```
 --filter @my-corp/app-a... --filter @my-corp/package-a...
+```
+
+**has_lock_file_changed**:
+```
+false
 ```
 
 ## Ignored files

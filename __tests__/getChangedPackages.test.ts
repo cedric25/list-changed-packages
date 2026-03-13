@@ -10,7 +10,7 @@ jest.unstable_mockModule('fs', () => ({
 
 const { execSync } = await import('child_process')
 const { readdirSync, readFileSync } = await import('fs')
-const { getChangedFiles, isFileInPackage, findPackages } =
+const { getChangedFiles, isFileInPackage, findPackages, getChangedPackages } =
   await import('../src/getChangedPackages.js')
 
 describe('getChangedFiles', () => {
@@ -177,5 +177,66 @@ describe('findPackages', () => {
       expect.stringContaining('node_modules'),
       expect.anything()
     )
+  })
+})
+
+describe('getChangedPackages - hasLockChanged', () => {
+  const mockedExecSync = execSync as jest.MockedFunction<typeof execSync>
+  const mockedReaddirSync = readdirSync as jest.MockedFunction<
+    typeof readdirSync
+  >
+  const mockedReadFileSync = readFileSync as jest.MockedFunction<
+    typeof readFileSync
+  >
+
+  function setupMinimalRepo(changedFiles: string[]) {
+    // git fetch + git diff
+    mockedExecSync.mockReturnValueOnce(Buffer.from(''))
+    mockedExecSync.mockReturnValueOnce(
+      Buffer.from(changedFiles.join('\n'))
+    )
+
+    // Repo with a single root package.json
+    mockedReaddirSync.mockReturnValueOnce([
+      { name: 'package.json', isDirectory: () => false } as any
+    ])
+    mockedReadFileSync.mockReturnValue(
+      JSON.stringify({ name: 'monorepo-root' })
+    )
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it.each([
+    ['package-lock.json'],
+    ['npm-shrinkwrap.json'],
+    ['pnpm-lock.yaml'],
+    ['yarn.lock'],
+    ['bun.lockb'],
+    ['bun.lock']
+  ])('returns hasLockChanged true when %s changed', (lockFile) => {
+    setupMinimalRepo([lockFile, 'src/index.ts'])
+
+    const result = getChangedPackages()
+
+    expect(result.hasLockChanged).toBe(true)
+  })
+
+  it('returns hasLockChanged false when no lock file changed', () => {
+    setupMinimalRepo(['src/index.ts', 'src/utils.ts'])
+
+    const result = getChangedPackages()
+
+    expect(result.hasLockChanged).toBe(false)
+  })
+
+  it('returns hasLockChanged false for nested lock files', () => {
+    setupMinimalRepo(['packages/pkg-a/package-lock.json'])
+
+    const result = getChangedPackages()
+
+    expect(result.hasLockChanged).toBe(false)
   })
 })

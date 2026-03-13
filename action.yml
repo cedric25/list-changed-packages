@@ -21,6 +21,8 @@ outputs:
     description:
       Ready-to-use pnpm filter you can give to pnpm install for example
       ("--filter package-1... --filter package-2...")
+  has_lock_file_changed:
+    description: Whether the lock file has changed (pnpm-lock.yaml, yarn.lock, etc.)
 
 runs:
   using: node24
