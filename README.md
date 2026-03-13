@@ -1,10 +1,14 @@
 # list-changed-packages
 
-This GitHub action lists all monorepo packages that contain at least one changed file in the current pull request.
+This GitHub action lists all monorepo packages that contain at least one changed
+file in the current pull request.
 
-For context, this was initially created to only run lint checks on changed packages inside a `pnpm` monorepo. But this should work just fine in any `npm` / `yarn` / `bun` monorepo.
+For context, this was initially created to only run lint checks on changed
+packages inside a `pnpm` monorepo. But this should work just fine in any `npm` /
+`yarn` / `bun` monorepo.
 
-This GitHub Action was initialized from [this template](https://github.com/actions/typescript-action).
+This GitHub Action was initialized from
+[this template](https://github.com/actions/typescript-action).
 
 You can find the original `README.md` file [here](./template_README.md).
 
@@ -72,33 +76,39 @@ root/
 ```
 
 and your current pull request contains changes in:
- - `apps/app-a/src/someFile.ts`,
- - `packages/package-a/src/someFile.ts`,
+
+- `apps/app-a/src/someFile.ts`,
+- `packages/package-a/src/someFile.ts`,
 
 this GitHub action will return 5 items as its output:
 
 **changed_packages**:
+
 ```
 @my-corp/app-a
 @my-corp/package-a
 ```
 
 **changed_packages_one_line**:
+
 ```
 @my-corp/app-a @my-corp/package-a
 ```
 
 **pnpm_filters_changed_packages**:
+
 ```
 --filter @my-corp/app-a --filter @my-corp/package-a
 ```
 
 **pnpm_filters_changed_and_down_packages**:
+
 ```
 --filter @my-corp/app-a... --filter @my-corp/package-a...
 ```
 
 **has_lock_file_changed**:
+
 ```
 false
 ```
@@ -110,14 +120,13 @@ false
 
 ## Methodology
 
-1️⃣
-List all changed files with:
+1️⃣ List all changed files with:
+
 ```
 git diff --name-only $(git merge-base HEAD origin/main)
 ```
 
-2️⃣
-Find all `package.json` files.
+2️⃣ Find all `package.json` files.
 
-3️⃣
-Loop over all `package.json` files and check if one changed file path is inside a package.
+3️⃣ Loop over all `package.json` files and check if one changed file path is
+inside a package.

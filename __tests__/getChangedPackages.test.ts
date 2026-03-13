@@ -192,9 +192,7 @@ describe('getChangedPackages - hasLockChanged', () => {
   function setupMinimalRepo(changedFiles: string[]) {
     // git fetch + git diff
     mockedExecSync.mockReturnValueOnce(Buffer.from(''))
-    mockedExecSync.mockReturnValueOnce(
-      Buffer.from(changedFiles.join('\n'))
-    )
+    mockedExecSync.mockReturnValueOnce(Buffer.from(changedFiles.join('\n')))
 
     // Repo with a single root package.json
     mockedReaddirSync.mockReturnValueOnce([

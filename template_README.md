@@ -27,8 +27,8 @@ follow the below instructions:
 
 > [!IMPORTANT]
 >
-> Make sure to remove or update the `CODEOWNERS` file! For
-> details on how to use this file, see
+> Make sure to remove or update the `CODEOWNERS` file! For details on how to use
+> this file, see
 > [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
 
 ## Initial Setup

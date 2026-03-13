@@ -28009,11 +28009,11 @@ function getChangedFiles() {
         .split('\n')
         .map((f) => f.trim())
         .filter(Boolean)
-        .filter((f) => !f.startsWith('docs/') && !f.endsWith('.md'));
+        .filter((f) => !f.includes('docs/') && !f.endsWith('.md'));
     return files;
 }
-function isFileInPackage(filePath, packageDir) {
-    const relative = path.relative(packageDir, filePath);
+function isFileInPackage(fileAbsolutePath, packageDir) {
+    const relative = path.relative(packageDir, fileAbsolutePath);
     return !relative.startsWith('..') && !path.isAbsolute(relative);
 }
 function findPackages(repoRoot) {
@@ -28042,15 +28042,27 @@ function findPackages(repoRoot) {
     }
     return packages;
 }
-async function getChangedPackages() {
-    const repoRootPath = process.argv[2] || process.cwd();
+function getChangedPackages() {
+    const repoRootPath = process.cwd();
     const changedFilesRelative = getChangedFiles();
     const changedFilesAbsolute = changedFilesRelative.map((f) => path.join(repoRootPath, f));
     const packages = findPackages(repoRootPath);
-    const changedPackages = packages.filter((pkg) => changedFilesAbsolute.some((file) => isFileInPackage(file, pkg.dir)));
-    return changedPackages
-        .map((pkg) => pkg.packageJson.name)
-        .filter((pkg) => pkg !== 'monorepo-root');
+    const changedPackages = packages.filter((pkg) => changedFilesAbsolute.some((fileAbsolutePath) => isFileInPackage(fileAbsolutePath, pkg.dir)));
+    const lockFiles = [
+        'package-lock.json',
+        'npm-shrinkwrap.json',
+        'pnpm-lock.yaml',
+        'yarn.lock',
+        'bun.lockb',
+        'bun.lock'
+    ];
+    const hasLockChanged = changedFilesRelative.some((f) => lockFiles.includes(f));
+    return {
+        changedPackages: changedPackages
+            .map((pkg) => pkg.packageJson.name)
+            .filter((pkg) => pkg !== 'monorepo-root'),
+        hasLockChanged
+    };
 }
 
 /**
@@ -28061,13 +28073,14 @@ async function getChangedPackages() {
 async function run() {
     try {
         debug('Starting...');
-        const changedPackages = await getChangedPackages();
+        const { changedPackages, hasLockChanged } = getChangedPackages();
         setOutput('changed_packages', changedPackages.join('\n'));
         setOutput('changed_packages_one_line', changedPackages.join(' '));
         setOutput('pnpm_filters_changed_packages', changedPackages.map((packageName) => `--filter ${packageName}`).join(' '));
         setOutput('pnpm_filters_changed_and_down_packages', changedPackages
             .map((packageName) => `--filter ${packageName}...`)
             .join(' '));
+        setOutput('has_lock_file_changed', hasLockChanged);
     }
     catch (error) {
         if (error instanceof Error)
