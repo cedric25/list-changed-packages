@@ -60,7 +60,7 @@ export function findPackages(repoRoot: string) {
   return packages
 }
 
-export async function getChangedPackages() {
+export function getChangedPackages() {
   const repoRootPath = process.cwd()
   const changedFilesRelative = getChangedFiles()
   const changedFilesAbsolute = changedFilesRelative.map((f) =>
@@ -72,7 +72,21 @@ export async function getChangedPackages() {
       isFileInPackage(fileAbsolutePath, pkg.dir)
     )
   )
-  return changedPackages
-    .map((pkg) => pkg.packageJson.name)
-    .filter((pkg) => pkg !== 'monorepo-root')
+
+  const lockFiles = [
+    'package-lock.json',
+    'npm-shrinkwrap.json',
+    'pnpm-lock.yaml',
+    'yarn.lock',
+    'bun.lockb',
+    'bun.lock'
+  ]
+  const hasLockChanged = changedFilesRelative.some((f) => lockFiles.includes(f))
+
+  return {
+    changedPackages: changedPackages
+      .map((pkg) => pkg.packageJson.name)
+      .filter((pkg) => pkg !== 'monorepo-root'),
+    hasLockChanged
+  }
 }

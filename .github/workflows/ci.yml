@@ -72,3 +72,6 @@ jobs:
           echo ""
           echo "pnpm_filters_changed_and_down_packages:"
           echo "${{ steps.test-action.outputs.pnpm_filters_changed_and_down_packages }}"
+          echo ""
+          echo "has_lock_file_changed:"
+          echo "${{ steps.test-action.outputs.has_lock_file_changed }}"
