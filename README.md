@@ -10,13 +10,13 @@ packages inside a `pnpm` monorepo. But this should work just fine in any `npm` /
 This GitHub Action was initialized from
 [this template](https://github.com/actions/typescript-action).
 
-You can find the original `README.md` file [here](./template_README.md).
+You can find the [original `README.md` file](./template_README.md).
 
 ## Use
 
 Job example:
 
-```
+```yaml
 jobs:
   list-changed:
     runs-on: ubuntu-22.04
@@ -60,7 +60,7 @@ jobs:
 
 Imagine having:
 
-```
+```text
 root/
 ├── apps/
 │   ├── app-a/
@@ -84,32 +84,32 @@ this GitHub action will return 5 items as its output:
 
 **changed_packages**:
 
-```
+```text
 @my-corp/app-a
 @my-corp/package-a
 ```
 
 **changed_packages_one_line**:
 
-```
+```text
 @my-corp/app-a @my-corp/package-a
 ```
 
 **pnpm_filters_changed_packages**:
 
-```
+```text
 --filter @my-corp/app-a --filter @my-corp/package-a
 ```
 
 **pnpm_filters_changed_and_down_packages**:
 
-```
+```text
 --filter @my-corp/app-a... --filter @my-corp/package-a...
 ```
 
 **has_lock_file_changed**:
 
-```
+```text
 false
 ```
 
@@ -122,7 +122,7 @@ false
 
 1️⃣ List all changed files with:
 
-```
+```text
 git diff --name-only $(git merge-base HEAD origin/main)
 ```
 
