@@ -46,4 +46,4 @@ mode.
 - Uses `@actions/core` for logging (not `console`), as required by GitHub
   Actions.
 - Node.js >= 24.0.0. Rollup bundles everything into `dist/index.js`.
-- Versioning follows semver; update `package.json` version when making changes.
+- Versioning follows SemVer; update `package.json` version when making changes.

@@ -1,6 +1,6 @@
 # list-changed-packages
 
-This GitHub action lists all monorepo packages that contain at least one changed
+This GitHub Action lists all monorepo packages that contain at least one changed
 file in the current pull request.
 
 For context, this was initially created to only run lint checks on changed
@@ -80,7 +80,7 @@ and your current pull request contains changes in:
 - `apps/app-a/src/someFile.ts`,
 - `packages/package-a/src/someFile.ts`,
 
-this GitHub action will return 5 items as its output:
+this GitHub Action will return 5 items as its output:
 
 **changed_packages**:
 
