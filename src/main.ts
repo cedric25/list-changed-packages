@@ -5,10 +5,7 @@ function setOutput(name: string, value: string | boolean): void {
   const outputFile = process.env['GITHUB_OUTPUT'] ?? ''
   if (outputFile) {
     const delimiter = `ghadelimiter_${crypto.randomUUID()}`
-    fs.appendFileSync(
-      outputFile,
-      `${name}<<${delimiter}\n${value}\n${delimiter}\n`
-    )
+    fs.appendFileSync(outputFile, `${name}<<${delimiter}\n${value}\n${delimiter}\n`)
   }
 }
 
@@ -31,9 +28,7 @@ export async function run(): Promise<void> {
     )
     setOutput(
       'pnpm_filters_changed_and_down_packages',
-      changedPackages
-        .map((packageName) => `--filter ${packageName}...`)
-        .join(' ')
+      changedPackages.map((packageName) => `--filter ${packageName}...`).join(' ')
     )
     setOutput('has_lock_file_changed', hasLockChanged)
   } catch (error) {

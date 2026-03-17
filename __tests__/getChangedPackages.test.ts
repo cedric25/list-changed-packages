@@ -102,12 +102,8 @@ describe('isFileInPackage', () => {
 })
 
 describe('findPackages', () => {
-  const mockedReaddirSync = readdirSync as jest.MockedFunction<
-    typeof readdirSync
-  >
-  const mockedReadFileSync = readFileSync as jest.MockedFunction<
-    typeof readFileSync
-  >
+  const mockedReaddirSync = readdirSync as jest.MockedFunction<typeof readdirSync>
+  const mockedReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -182,12 +178,8 @@ describe('findPackages', () => {
 
 describe('getChangedPackages - hasLockChanged', () => {
   const mockedExecSync = execSync as jest.MockedFunction<typeof execSync>
-  const mockedReaddirSync = readdirSync as jest.MockedFunction<
-    typeof readdirSync
-  >
-  const mockedReadFileSync = readFileSync as jest.MockedFunction<
-    typeof readFileSync
-  >
+  const mockedReaddirSync = readdirSync as jest.MockedFunction<typeof readdirSync>
+  const mockedReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>
 
   function setupMinimalRepo(changedFiles: string[]) {
     // git fetch + git diff
@@ -198,9 +190,7 @@ describe('getChangedPackages - hasLockChanged', () => {
     mockedReaddirSync.mockReturnValueOnce([
       { name: 'package.json', isDirectory: () => false } as any
     ])
-    mockedReadFileSync.mockReturnValue(
-      JSON.stringify({ name: 'monorepo-root' })
-    )
+    mockedReadFileSync.mockReturnValue(JSON.stringify({ name: 'monorepo-root' }))
   }
 
   beforeEach(() => {

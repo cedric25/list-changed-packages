@@ -13,9 +13,7 @@ import * as fs from 'fs'
  */
 export function getChangedFiles() {
   execSync('git fetch origin main', { stdio: 'ignore' })
-  const output = execSync(
-    'git diff --name-only $(git merge-base HEAD origin/main)'
-  ).toString()
+  const output = execSync('git diff --name-only $(git merge-base HEAD origin/main)').toString()
   const files = output
     .split('\n')
     .map((f) => f.trim())
@@ -40,11 +38,7 @@ export function findPackages(repoRoot: string) {
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name)
       if (entry.isDirectory()) {
-        if (
-          entry.name !== 'node_modules' &&
-          entry.name !== 'dist' &&
-          entry.name !== '.git'
-        ) {
+        if (entry.name !== 'node_modules' && entry.name !== 'dist' && entry.name !== '.git') {
           stack.push(fullPath)
         }
       } else if (entry.name === 'package.json') {
@@ -63,14 +57,10 @@ export function findPackages(repoRoot: string) {
 export function getChangedPackages() {
   const repoRootPath = process.cwd()
   const changedFilesRelative = getChangedFiles()
-  const changedFilesAbsolute = changedFilesRelative.map((f) =>
-    path.join(repoRootPath, f)
-  )
+  const changedFilesAbsolute = changedFilesRelative.map((f) => path.join(repoRootPath, f))
   const packages = findPackages(repoRootPath)
   const changedPackages = packages.filter((pkg) =>
-    changedFilesAbsolute.some((fileAbsolutePath) =>
-      isFileInPackage(fileAbsolutePath, pkg.dir)
-    )
+    changedFilesAbsolute.some((fileAbsolutePath) => isFileInPackage(fileAbsolutePath, pkg.dir))
   )
 
   const lockFiles = [

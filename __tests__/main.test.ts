@@ -54,9 +54,7 @@ describe('main.ts', () => {
     const outputs = readOutputFile(outputFile)
     expect(outputs['changed_packages']).toBe('package-1\npackage-2')
     expect(outputs['changed_packages_one_line']).toBe('package-1 package-2')
-    expect(outputs['pnpm_filters_changed_packages']).toBe(
-      '--filter package-1 --filter package-2'
-    )
+    expect(outputs['pnpm_filters_changed_packages']).toBe('--filter package-1 --filter package-2')
     expect(outputs['pnpm_filters_changed_and_down_packages']).toBe(
       '--filter package-1... --filter package-2...'
     )
@@ -96,9 +94,7 @@ describe('main.ts', () => {
 
     await run()
 
-    expect(consoleSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining('::error::')
-    )
+    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('::error::'))
     consoleSpy.mockRestore()
   })
 })
