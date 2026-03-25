@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0
 
       - name: Find changed packages
-        uses: cedric25/list-changed-packages@v1.1.0
+        uses: cedric25/list-changed-packages@v1.3.0
         id: changed-packages
 
       - name: See result
