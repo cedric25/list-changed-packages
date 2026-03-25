@@ -1,7 +1,5 @@
 name: Get changed packages
-description:
-  Compares your git branch to its base, list changed files and output related
-  packages
+description: Compares your git branch to its base, list changed files and output related packages
 author: Cedric Nicoloso (cedric.nicoloso@gmail.com)
 
 branding:
@@ -15,15 +13,14 @@ outputs:
     description: List of changed packages, separated by one space
   pnpm_filters_changed_packages:
     description:
-      Ready-to-use pnpm filter you can give to pnpm install for example
-      ("--filter package-1 --filter package-2")
+      Ready-to-use pnpm filter you can give to pnpm install for example ("--filter package-1
+      --filter package-2")
   pnpm_filters_changed_and_down_packages:
     description:
-      Ready-to-use pnpm filter you can give to pnpm install for example
-      ("--filter package-1... --filter package-2...")
+      Ready-to-use pnpm filter you can give to pnpm install for example ("--filter package-1...
+      --filter package-2...")
   has_lock_file_changed:
-    description:
-      Whether the lock file has changed (pnpm-lock.yaml, yarn.lock, etc.)
+    description: Whether the lock file has changed (pnpm-lock.yaml, yarn.lock, etc.)
 
 runs:
   using: node24

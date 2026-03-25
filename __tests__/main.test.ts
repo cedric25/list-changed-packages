@@ -1,29 +1,46 @@
 /**
  * Unit tests for the action's main functionality, src/main.ts
- *
- * To mock dependencies in ESM, you can create fixtures that export mock
- * functions and objects. For example, the core module is mocked in this test,
- * so that the actual '@actions/core' module is not imported.
  */
 import { jest } from '@jest/globals'
-import * as core from '../__fixtures__/core.js'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
 
 const mockGetChangedPackages =
   jest.fn<() => { changedPackages: string[]; hasLockChanged: boolean }>()
 
-// Mocks should be declared before the module being tested is imported.
-jest.unstable_mockModule('@actions/core', () => core)
 jest.unstable_mockModule('../src/getChangedPackages.js', () => ({
   getChangedPackages: mockGetChangedPackages
 }))
 
-// The module being tested should be imported dynamically. This ensures that the
-// mocks are used in place of any actual dependencies.
 const { run } = await import('../src/main.js')
 
+function readOutputFile(filePath: string): Record<string, string> {
+  const content = fs.readFileSync(filePath, 'utf8')
+  const outputs: Record<string, string> = {}
+  const regex = /^(.+?)<<ghadelimiter_[^\n]+\n([\s\S]*?)\nghadelimiter_/gm
+  let match
+  while ((match = regex.exec(content)) !== null) {
+    outputs[match[1]] = match[2]
+  }
+  return outputs
+}
+
 describe('main.ts', () => {
+  let outputFile: string
+
   beforeEach(() => {
     jest.clearAllMocks()
+    outputFile = path.join(os.tmpdir(), `test-output-${Date.now()}`)
+    fs.writeFileSync(outputFile, '')
+    process.env['GITHUB_OUTPUT'] = outputFile
+    process.exitCode = 0
+  })
+
+  afterEach(() => {
+    fs.unlinkSync(outputFile)
+    delete process.env['GITHUB_OUTPUT']
+    process.exitCode = 0
   })
 
   it('Gets this repo package as result', async () => {
@@ -34,31 +51,14 @@ describe('main.ts', () => {
 
     await run()
 
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'changed_packages',
-      'package-1\npackage-2'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      2,
-      'changed_packages_one_line',
-      'package-1 package-2'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      3,
-      'pnpm_filters_changed_packages',
-      '--filter package-1 --filter package-2'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      4,
-      'pnpm_filters_changed_and_down_packages',
+    const outputs = readOutputFile(outputFile)
+    expect(outputs['changed_packages']).toBe('package-1\npackage-2')
+    expect(outputs['changed_packages_one_line']).toBe('package-1 package-2')
+    expect(outputs['pnpm_filters_changed_packages']).toBe('--filter package-1 --filter package-2')
+    expect(outputs['pnpm_filters_changed_and_down_packages']).toBe(
       '--filter package-1... --filter package-2...'
     )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      5,
-      'has_lock_file_changed',
-      false
-    )
+    expect(outputs['has_lock_file_changed']).toBe('false')
   })
 
   it('sets has_lock_file_changed to true when package-lock.json changed', async () => {
@@ -69,30 +69,32 @@ describe('main.ts', () => {
 
     await run()
 
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      5,
-      'has_lock_file_changed',
-      true
-    )
+    const outputs = readOutputFile(outputFile)
+    expect(outputs['has_lock_file_changed']).toBe('true')
   })
 
   it('sets failed if an error occurs', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
     mockGetChangedPackages.mockImplementation(() => {
       throw new Error('something went wrong')
     })
 
     await run()
 
-    expect(core.setFailed).toHaveBeenCalledWith('something went wrong')
+    expect(consoleSpy).toHaveBeenCalledWith('::error::something went wrong')
+    expect(process.exitCode).toBe(1)
+    consoleSpy.mockRestore()
   })
 
   it('handles non-Error objects in catch block', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
     mockGetChangedPackages.mockImplementation(() => {
       throw 'not an error object'
     })
 
     await run()
 
-    expect(core.setFailed).not.toHaveBeenCalled()
+    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('::error::'))
+    consoleSpy.mockRestore()
   })
 })

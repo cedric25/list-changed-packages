@@ -7,6 +7,8 @@ For context, this was initially created to only run lint checks on changed
 packages inside a `pnpm` monorepo. But this should work just fine in any `npm` /
 `yarn` / `bun` monorepo.
 
+🟣 Edit: If you use **pnpm**, you can probably achieve the same thing with `pnpm list`.
+
 This GitHub Action was initialized from
 [this template](https://github.com/actions/typescript-action).
 
@@ -130,3 +132,66 @@ git diff --name-only $(git merge-base HEAD origin/main)
 
 3️⃣ Loop over all `package.json` files and check if one changed file path is
 inside a package.
+
+## Directly with `pnpm list`
+
+Use:
+
+```shell
+pnpm list --recursive --depth -1 --filter="[origin/main]" --json
+```
+
+Or to avoid listing packages that have changed on `origin/main` since you checked out your branch:
+
+```shell
+base_commit_hash=$(git merge-base HEAD origin/main)
+packages_json=$(pnpm list --recursive --depth -1 --filter='[${base_commit_hash}]' --json)
+```
+
+```yaml
+jobs:
+  list-changed:
+    runs-on: ubuntu-22.04
+    outputs:
+      changed_packages: ${{ steps.changed-packages.outputs.changed_packages }}
+      pnpm_filters_changed_packages: ${{ steps.changed-packages.outputs.pnpm_filters_changed_packages }}
+      pnpm_filters_changed_and_down_packages: ${{ steps.changed-packages.outputs.pnpm_filters_changed_and_down_packages }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Setup pnpm
+        uses: ./.github/actions/pnpm-setup
+        with:
+          node-version: 22.19.0
+
+      - name: Find changed packages
+        id: changed-packages
+        run: |
+          base_commit_hash=$(git merge-base HEAD origin/main)
+          packages_json=$(pnpm list --recursive --depth -1 --filter='[${base_commit_hash}]' --json)
+          changed_packages=$(echo "$packages_json" | jq -c '[.[].name]')
+          echo "changed_packages=$changed_packages" >> "$GITHUB_OUTPUT"
+
+          pnpm_filters_changed_packages=$(echo "$changed_packages" | jq -r 'map("--filter " + .) | join(" ")')
+          echo "pnpm_filters_changed_packages=$pnpm_filters_changed_packages" >> "$GITHUB_OUTPUT"
+
+          pnpm_filters_changed_and_down_packages=$(echo "$changed_packages" | jq -r 'map("--filter " + . + "...") | join(" ")')
+          echo "pnpm_filters_changed_and_down_packages=$pnpm_filters_changed_and_down_packages" >> "$GITHUB_OUTPUT"
+
+      - name: See result
+        shell: bash
+        run: |
+          echo ''
+          echo "changed_packages:"
+          echo "${{ steps.changed-packages.outputs.changed_packages }}"
+          echo ''
+          echo "pnpm_filters_changed_packages:"
+          echo "${{ steps.changed-packages.outputs.pnpm_filters_changed_packages }}"
+          echo ''
+          echo "pnpm_filters_changed_and_down_packages:"
+          echo "${{ steps.changed-packages.outputs.pnpm_filters_changed_and_down_packages }}"
+```
